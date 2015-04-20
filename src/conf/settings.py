@@ -5,13 +5,20 @@ SYSLOG_HOST = os.environ.get('SYSLOG_HOST', 'syslog-aws.dubizzlecloud.internal')
 SYSLOG_PORT = os.environ.get('SYSLOG_PORT', '1122')
 LOGGING_FILE_HANDLER = os.environ.get('LOGGING_FILE_HANDLER', 'file_handler')
 
+MESOS_HOST = os.environ.get('MESOS_HOST',
+                            'internal-mesos-master-1370648645.eu-west-1.elb.amazonaws.com')
 MARATHON_PORT = os.environ.get('MARATHON_PORT', 8080)
 CHRONOS_PORT = os.environ.get('CHRONOS_PORT', 4400)
 
 DATADOG_API_KEY = os.environ.get('DATADOG_API_KEY')
 DATADOG_APP_KEY = os.environ.get('DATADOG_APP_KEY')
 
-ZK_HOSTS = os.environ.get('ZK_HOSTS')
+CHECK_INTERVAL = os.environ.get('CHECK_INTERVAL', 300)
+
+# following metrics will be added based one the current timestamp
+CHRONOS_FIELDS = ['successCount', 'errorCount', 'errorsSinceLastSuccess']
+# metrics will be added based on the given timestamp
+CHRONOS_TIME_FIELDS = ['lastSuccess', 'lastError']
 
 current_path = os.path.dirname(os.path.abspath(__file__))
 file_path = os.path.abspath(os.path.join(current_path, 'local_settings.py'))
@@ -20,6 +27,9 @@ try:
     execfile(file_path, globals(), locals())
 except:
     pass
+
+CHRONOS_JOBS_URI = "http://%s:%s/scheduler/jobs" % (MESOS_HOST, CHRONOS_PORT)
+MARATHON_APPS_URI = "http://%s:%s/v2/apps" % (MESOS_HOST, MARATHON_PORT)
 
 LOGGING = {
     'version': 1,
@@ -60,9 +70,9 @@ LOGGING = {
     },
     'loggers': {
         'orion': {
-              'handlers': LOGGING_FILE_HANDLER,
+              'handlers': [LOGGING_FILE_HANDLER],
               'propagate': True,
-              'level': 'DEBUG',
+              'level': 'INFO',
         }
     }
 }

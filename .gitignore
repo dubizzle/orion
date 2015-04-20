@@ -40,4 +40,3 @@ local_settings.py
 
 # ignore vim files
 *.swp
-

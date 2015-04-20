@@ -34,9 +34,4 @@ RUN         git clone git@bitbucket.org:dubizzle/orion.git $REPO_DIR
 RUN         virtualenv --system-site-packages $VENV_DIR && \
             $VENV_PIP install -r $REPO_DIR/requirements/base.txt
 
-USER        root
-RUN         mkdir -p /etc/service/nazgul_uwsgi /etc/service/nazgul_nginx; \
-            cp $REPO_DIR/docker/services/uwsgi.sh /etc/service/nazgul_uwsgi/run; \
-            chmod +x /etc/service/nazgul_uwsgi/run
-
 CMD         ["/sbin/my_init"]
