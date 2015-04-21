@@ -15,10 +15,11 @@ DATADOG_APP_KEY = os.environ.get('DATADOG_APP_KEY')
 
 CHECK_INTERVAL = os.environ.get('CHECK_INTERVAL', 300)
 
-# following metrics will be added based one the current timestamp
-CHRONOS_FIELDS = ['successCount', 'errorCount', 'errorsSinceLastSuccess']
-# metrics will be added based on the given timestamp
-CHRONOS_TIME_FIELDS = ['lastSuccess', 'lastError']
+CHRONOS_FIELDS = {'int': ['successCount', 'errorCount', 'errorsSinceLastSuccess'],
+                  'datetime': ['lastSuccess', 'lastError']}
+MARATHON_FIELDS = {'int': ['consecutiveFailures'],
+                   'boolean': ['alive'],
+                   'datetime': ['firstSuccess', 'lastFailure', 'lastSuccess']}
 
 current_path = os.path.dirname(os.path.abspath(__file__))
 file_path = os.path.abspath(os.path.join(current_path, 'local_settings.py'))

@@ -38,16 +38,43 @@ def iso_to_timestamp(metric_datetime):
 	return metric_timestamp
 
 
-def datadog_post(metric, points):
+def datadog_post(metric, points, tags):
 	""" This function sends the data to datadog
 
 	metric: A custom matric will be generated based on this name
 	points: A value of the metric
 	"""
 
-	status = api.Metric.send(metric=metric, points=points)
-	logger.info("Metric: %s - Points: %s - Status: %s" %
-				(metric, points, status))
+	status = api.Metric.send(metric=metric, points=points, tags=tags)
+	message = ("Metric: %s - Points: %s, Tags: %s - Status: %s" %
+		(metric, points, tags, status)
+	)
+	print message
+	logger.info(message)
+
+
+def prepare_and_post_data(available_fields, items,
+                          metric=None, tags=[]):
+	""" This function prepares the data and send it to datadog
+
+	available_fields: list of fields we want to send to datadog
+	items: list of tasks/jobs
+	metric: datadog metric
+	tags: list of tags
+	"""
+
+	for item in items:
+		if not metric:
+			metric = "chronos_%s" % item['name']
+		for field in available_fields.get('int', []):
+			datadog_post("%s.%s" % (metric, field), item[field], tags)
+		for field in available_fields.get('boolean', []):
+			datadog_post("%s.%s" % (metric, field), int(item[field]), tags)
+		for field in available_fields.get('datetime', []):
+			metric_timestamp = iso_to_timestamp(item[field])
+			if metric_timestamp:
+				datadog_post("%s.%s" % (metric, field),
+					(metric_timestamp, 1), tags)
 
 
 def process_chronos_jobs():
@@ -61,17 +88,36 @@ def process_chronos_jobs():
 		logger.error("Chronos Endpoint exception: %s" % e)
 		return
 
-	jobs = req.json()
+	prepare_and_post_data(settings.CHRONOS_FIELDS, req.json())
 
-	for job in data:
-		metric = "chronos_%s" % job['name']
-		for field in settings.CHRONOS_FIELDS:
-			datadog_send_data("%s.%s" % (metric, field), job[field])
+	return True
 
-		for field in settings.CHRONOS_TIME_FIELDS:
-			metric_timestamp = iso_to_timestamp(job[field])
-			if metric_timestamp:
-				datadog_send_data("%s.%s" % (metric, field),
-								  (metric_timestamp, 1))
+def process_marathon_tasks():
+	""" This function gets all the marathon tasks
+	health check and send it to datadog
+	"""
+
+	try:
+		# get the apps
+		req = requests.get(settings.MARATHON_APPS_URI, timeout=5)
+	except exceptions.ConnectionError as e:
+		logger.error("Chronos Endpoint exception: %s" % e)
+		return
+
+	data = req.json()
+
+	for app in data['apps']:
+		# gets app health checks
+		req = requests.get("%s%s" % (settings.MARATHON_APPS_URI, app['id'])
+		metric = "marathon_%s" % app['id'][1:]
+
+		apps = req.json()
+
+		tasks = apps['app']['tasks']
+		for task in tasks:
+			tags = [task['id']]
+			results = task['healthCheckResults']
+			prepare_and_post_data(settings.MARATHON_FIELDS,
+				results, metric, tags)
 
 	return True
