@@ -6,7 +6,7 @@ ENV         USER            meteor
 ENV         GROUP           $USER
 ENV         USER_DIR        /opt/$USER
 ENV         VENV_DIR        $USER_DIR/.env
-ENV         REPO_DIR        $VENV_DIR/orion
+ENV         REPO_DIR        $USER_DIR/orion
 ENV         VENV_PYTHON     $VENV_DIR/bin/python
 ENV         VENV_PIP        $VENV_DIR/bin/pip
 
