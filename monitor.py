@@ -121,3 +121,9 @@ def process_marathon_tasks():
 				results, metric, tags)
 
 	return True
+
+if __name__ == "__main__":
+	while True:
+		process_marathon_tasks()
+		process_chronos_jobs()
+		time.sleep(settings.CHECK_INTERVAL)
