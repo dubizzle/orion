@@ -30,7 +30,7 @@ RUN         useradd -m -d $USER_DIR -p $USER -s /bin/bash $USER && \
             chown $USER:$GROUP /var/log/$USER -R
 
 USER        $USER
-RUN         git clone git@bitbucket.org:dubizzle/orion.git $REPO_DIR
+RUN         git clone https://github.com/dubizzle/orion.git $REPO_DIR
 RUN         virtualenv --system-site-packages $VENV_DIR && \
             $VENV_PIP install -r $REPO_DIR/requirements/base.txt
 
