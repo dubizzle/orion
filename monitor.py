@@ -108,7 +108,7 @@ def process_marathon_tasks():
 
 	for app in data['apps']:
 		# gets app health checks
-		req = requests.get("%s%s" % (settings.MARATHON_APPS_URI, app['id'])
+		req = requests.get("%s%s" % (settings.MARATHON_APPS_URI, app['id']))
 		metric = "marathon_%s" % app['id'][1:]
 
 		apps = req.json()
