@@ -88,7 +88,8 @@ def process_chronos_jobs():
         logger.error("Chronos Endpoint exception: %s" % e)
         return
 
-    prepare_and_post_data(settings.CHRONOS_FIELDS, req.json())
+    if req.ok:
+        prepare_and_post_data(settings.CHRONOS_FIELDS, req.json())
 
     return True
 
@@ -104,6 +105,9 @@ def process_marathon_tasks():
         logger.error("Chronos Endpoint exception: %s" % e)
         return
 
+    if !req.ok:
+        return
+
     data = req.json()
 
     for app in data['apps']:
@@ -116,7 +120,7 @@ def process_marathon_tasks():
         tasks = apps['app']['tasks']
         for task in tasks:
             tags = [task['id']]
-            results = task['healthCheckResults']
+            results = task.get('healthCheckResults', [])
             prepare_and_post_data(settings.MARATHON_FIELDS,
                 results, metric, tags)
 
