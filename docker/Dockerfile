@@ -25,12 +25,13 @@ RUN         set -e && \
                                git
 
 RUN         useradd -m -d $USER_DIR -p $USER -s /bin/bash $USER && \
+            adduser $USER sudo && \
             chown $USER:$GROUP $USER_DIR -R && \
             mkdir -p /var/log/$USER && \
             chown $USER:$GROUP /var/log/$USER -R
 
 USER        $USER
-RUN         git clone https://github.com/dubizzle/orion.git $REPO_DIR
+RUN         git clone -b base https://github.com/dubizzle/orion.git $REPO_DIR
 RUN         virtualenv --system-site-packages $VENV_DIR && \
             $VENV_PIP install -r $REPO_DIR/requirements/base.txt
 

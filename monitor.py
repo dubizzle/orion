@@ -105,7 +105,7 @@ def process_marathon_tasks():
         logger.error("Chronos Endpoint exception: %s" % e)
         return
 
-    if !req.ok:
+    if not req.ok:
         return
 
     data = req.json()
